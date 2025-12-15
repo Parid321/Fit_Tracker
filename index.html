@@ -2,31 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FitTrack - Physical Activity Manager</title>
+    <title>FitTrack - Manage Your Fitness</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<header>
     <h1>FitTrack</h1>
-    <p>Manage your physical activity and calories burned</p>
+    <p>Your personal physical activity & calorie manager</p>
+</header>
 
-    <section class="calculator">
-        <h2>Calories Calculator (WIP)</h2>
+<main>
+    <section class="card">
+        <h2>Activity Tracker</h2>
 
-        <label>Activity Type:</label>
+        <label>Activity Type</label>
         <select id="activity">
             <option value="walking">Walking</option>
             <option value="running">Running</option>
+            <option value="cycling">Cycling</option>
         </select>
 
-        <label>Duration (minutes):</label>
-        <input type="number" id="minutes">
+        <label>Duration (minutes)</label>
+        <input type="number" id="minutes" min="1">
 
-        <button onclick="calculateCalories()">Calculate</button>
+        <label>Intensity</label>
+        <select id="intensity">
+            <option value="1">Low</option>
+            <option value="1.5">Medium</option>
+            <option value="2">High</option>
+        </select>
 
-        <p id="result"></p>
+        <button onclick="calculateCalories()">Calculate Calories</button>
+
+        <div id="result" class="result"></div>
     </section>
+</main>
 
-    <script src="script.js"></script>
+<footer>
+    <p>© 2025 FitTrack | Software Engineering Project</p>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
+
