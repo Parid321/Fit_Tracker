@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">tests</a> &gt; <span class="el_source">AuthServiceTest.java</span></div><h1>AuthServiceTest.java</h1><pre class="source lang-java linenums">package tests;
+
+import dao.UserDao;
+import model.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import service.AuthService;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L11">public class AuthServiceTest {</span>
+
+  @BeforeEach
+  void init() {
+<span class="fc" id="L15">    TestBootstrap.initDb();</span>
+<span class="fc" id="L16">  }</span>
+
+  @Test
+  void register_then_login_success() throws Exception {
+<span class="fc" id="L20">    AuthService auth = new AuthService();</span>
+
+<span class="fc" id="L22">    User u = auth.register(&quot;Test&quot;, &quot;t@test.com&quot;, 20, 70.0, &quot;Goal&quot;, &quot;secret123&quot;);</span>
+<span class="fc" id="L23">    assertNotNull(u);</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">    assertTrue(u.userID &gt; 0);</span>
+
+<span class="fc" id="L26">    User logged = auth.login(&quot;t@test.com&quot;, &quot;secret123&quot;);</span>
+<span class="fc" id="L27">    assertNotNull(logged);</span>
+<span class="fc" id="L28">    assertEquals(&quot;t@test.com&quot;, logged.email);</span>
+<span class="fc" id="L29">  }</span>
+
+  @Test
+  void login_wrongPassword_fails() throws Exception {
+<span class="fc" id="L33">    AuthService auth = new AuthService();</span>
+<span class="fc" id="L34">    auth.register(&quot;A&quot;, &quot;a@test.com&quot;, null, null, null, &quot;pass1&quot;);</span>
+
+<span class="fc" id="L36">    User logged = auth.login(&quot;a@test.com&quot;, &quot;wrong&quot;);</span>
+<span class="fc" id="L37">    assertNull(logged);</span>
+<span class="fc" id="L38">  }</span>
+
+  @Test
+  void register_duplicateEmail_returnsNull() throws Exception {
+<span class="fc" id="L42">    AuthService auth = new AuthService();</span>
+<span class="fc" id="L43">    assertNotNull(auth.register(&quot;A&quot;, &quot;dup@test.com&quot;, null, null, null, &quot;p1&quot;));</span>
+<span class="fc" id="L44">    assertNull(auth.register(&quot;B&quot;, &quot;dup@test.com&quot;, null, null, null, &quot;p2&quot;));</span>
+<span class="fc" id="L45">  }</span>
+
+  @Test
+  void storedPassword_isHashed_notPlainText() throws Exception {
+<span class="fc" id="L49">    AuthService auth = new AuthService();</span>
+<span class="fc" id="L50">    auth.register(&quot;H&quot;, &quot;hash@test.com&quot;, null, null, null, &quot;plainpass&quot;);</span>
+
+<span class="fc" id="L52">    UserDao dao = new UserDao();</span>
+<span class="fc" id="L53">    User u = dao.findByEmail(&quot;hash@test.com&quot;);</span>
+
+<span class="fc" id="L55">    assertNotNull(u);</span>
+<span class="fc" id="L56">    assertNotEquals(&quot;plainpass&quot;, u.passwordHash);</span>
+<span class="fc" id="L57">    assertEquals(64, u.passwordHash.length()); // SHA-256 hex</span>
+<span class="fc" id="L58">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">service</a> &gt; <span class="el_source">StatisticsService.java</span></div><h1>StatisticsService.java</h1><pre class="source lang-java linenums">package service;
+
+import dao.ActivityDao;
+import dao.StatisticsDao;
+import model.Statistic;
+
+import java.time.LocalDate;
+
+<span class="nc" id="L9">public class StatisticsService {</span>
+<span class="nc" id="L10">  private final ActivityDao activityDao = new ActivityDao();</span>
+<span class="nc" id="L11">  private final StatisticsDao statisticsDao = new StatisticsDao();</span>
+
+  public Statistic generate(long userID, String period) throws Exception {
+<span class="nc bnc" id="L14" title="All 2 branches missed.">    int days = &quot;Monthly&quot;.equals(period) ? 30 : 7;</span>
+<span class="nc" id="L15">    LocalDate to = LocalDate.now();</span>
+<span class="nc" id="L16">    LocalDate from = to.minusDays(days - 1);</span>
+
+<span class="nc" id="L18">    String fromISO = from.toString();</span>
+<span class="nc" id="L19">    String toISO = to.toString();</span>
+
+<span class="nc" id="L21">    int totalCalories = activityDao.sumCaloriesBetween(userID, fromISO, toISO);</span>
+<span class="nc" id="L22">    int totalActs = activityDao.countBetween(userID, fromISO, toISO);</span>
+
+<span class="nc" id="L24">    Statistic s = new Statistic();</span>
+<span class="nc" id="L25">    s.userID = userID;</span>
+<span class="nc" id="L26">    s.period = period;</span>
+<span class="nc" id="L27">    s.totalActivities = totalActs;</span>
+<span class="nc" id="L28">    s.totalCalories = totalCalories;</span>
+<span class="nc" id="L29">    s.avgProgress = (int)Math.round(totalCalories / (double)days);</span>
+
+<span class="nc" id="L31">    statisticsDao.insert(s);</span>
+<span class="nc" id="L32">    return s;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">dao</a> &gt; <span class="el_source">ActivityDao.java</span></div><h1>ActivityDao.java</h1><pre class="source lang-java linenums">package dao;
+
+import db.Db;
+import model.Activity;
+
+import java.sql.*;
+import java.util.*;
+
+<span class="fc" id="L9">public class ActivityDao {</span>
+
+  public long insert(Activity a) throws SQLException {
+<span class="fc" id="L12">    String sql = &quot;INSERT INTO Activities(userID,type,distance_km,duration_min,calories,activity_date,notes) VALUES(?,?,?,?,?,?,?)&quot;;</span>
+<span class="fc" id="L13">    try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L14">      ps.setLong(1, a.userID);</span>
+<span class="fc" id="L15">      ps.setString(2, a.type);</span>
+<span class="fc" id="L16">      ps.setDouble(3, a.distanceKm);</span>
+<span class="fc" id="L17">      ps.setInt(4, a.durationMin);</span>
+<span class="fc" id="L18">      ps.setInt(5, a.calories);</span>
+<span class="fc" id="L19">      ps.setString(6, a.activityDate);</span>
+<span class="fc" id="L20">      ps.setString(7, a.notes);</span>
+<span class="fc" id="L21">      ps.executeUpdate();</span>
+<span class="fc" id="L22">      try (ResultSet keys = ps.getGeneratedKeys()) {</span>
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        return keys.next() ? keys.getLong(1) : -1;</span>
+      }
+    }
+  }
+
+  public void delete(long activityID, long userID) throws SQLException {
+<span class="nc" id="L29">    String sql = &quot;DELETE FROM Activities WHERE activityID=? AND userID=?&quot;;</span>
+<span class="nc" id="L30">    try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(sql)) {</span>
+<span class="nc" id="L31">      ps.setLong(1, activityID);</span>
+<span class="nc" id="L32">      ps.setLong(2, userID);</span>
+<span class="nc" id="L33">      ps.executeUpdate();</span>
+    }
+<span class="nc" id="L35">  }</span>
+
+  public List&lt;Activity&gt; listForUser(long userID) throws SQLException {
+<span class="nc" id="L38">    String sql = &quot;SELECT * FROM Activities WHERE userID=? ORDER BY activity_date DESC, activityID DESC&quot;;</span>
+<span class="nc" id="L39">    try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(sql)) {</span>
+<span class="nc" id="L40">      ps.setLong(1, userID);</span>
+<span class="nc" id="L41">      try (ResultSet rs = ps.executeQuery()) {</span>
+<span class="nc" id="L42">        List&lt;Activity&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        while (rs.next()) out.add(map(rs));</span>
+<span class="nc" id="L44">        return out;</span>
+      }
+    }
+  }
+
+  public int sumCaloriesBetween(long userID, String fromISO, String toISO) throws SQLException {
+<span class="nc" id="L50">    String sql = &quot;SELECT COALESCE(SUM(calories),0) FROM Activities WHERE userID=? AND activity_date BETWEEN ? AND ?&quot;;</span>
+<span class="nc" id="L51">    try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(sql)) {</span>
+<span class="nc" id="L52">      ps.setLong(1, userID);</span>
+<span class="nc" id="L53">      ps.setString(2, fromISO);</span>
+<span class="nc" id="L54">      ps.setString(3, toISO);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">      try (ResultSet rs = ps.executeQuery()) { return rs.next() ? rs.getInt(1) : 0; }</span>
+    }
+  }
+
+  public int countBetween(long userID, String fromISO, String toISO) throws SQLException {
+<span class="nc" id="L60">    String sql = &quot;SELECT COUNT(*) FROM Activities WHERE userID=? AND activity_date BETWEEN ? AND ?&quot;;</span>
+<span class="nc" id="L61">    try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(sql)) {</span>
+<span class="nc" id="L62">      ps.setLong(1, userID);</span>
+<span class="nc" id="L63">      ps.setString(2, fromISO);</span>
+<span class="nc" id="L64">      ps.setString(3, toISO);</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">      try (ResultSet rs = ps.executeQuery()) { return rs.next() ? rs.getInt(1) : 0; }</span>
+    }
+  }
+
+  private Activity map(ResultSet rs) throws SQLException {
+<span class="fc" id="L70">    Activity a = new Activity();</span>
+<span class="fc" id="L71">    a.activityID = rs.getLong(&quot;activityID&quot;);</span>
+<span class="fc" id="L72">    a.userID = rs.getLong(&quot;userID&quot;);</span>
+<span class="fc" id="L73">    a.type = rs.getString(&quot;type&quot;);</span>
+<span class="fc" id="L74">    a.distanceKm = rs.getDouble(&quot;distance_km&quot;);</span>
+<span class="fc" id="L75">    a.durationMin = rs.getInt(&quot;duration_min&quot;);</span>
+<span class="fc" id="L76">    a.calories = rs.getInt(&quot;calories&quot;);</span>
+<span class="fc" id="L77">    a.activityDate = rs.getString(&quot;activity_date&quot;);</span>
+<span class="fc" id="L78">    a.notes = rs.getString(&quot;notes&quot;);</span>
+<span class="fc" id="L79">    return a;</span>
+  }
+
+  public List&lt;Activity&gt; listForUserFiltered(long userID, String fromISO, String toISO) throws SQLException {
+<span class="fc" id="L83">  String base = &quot;SELECT * FROM Activities WHERE userID=? &quot;;</span>
+<span class="pc bpc" id="L84" title="1 of 4 branches missed.">  boolean hasFrom = fromISO != null &amp;&amp; !fromISO.isBlank();</span>
+<span class="pc bpc" id="L85" title="1 of 4 branches missed.">  boolean hasTo = toISO != null &amp;&amp; !toISO.isBlank();</span>
+
+<span class="fc bfc" id="L87" title="All 4 branches covered.">  if (hasFrom &amp;&amp; hasTo) base += &quot;AND activity_date BETWEEN ? AND ? &quot;;</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">  else if (hasFrom) base += &quot;AND activity_date &gt;= ? &quot;;</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">  else if (hasTo) base += &quot;AND activity_date &lt;= ? &quot;;</span>
+
+<span class="fc" id="L91">  base += &quot;ORDER BY activity_date DESC, activityID DESC&quot;;</span>
+
+<span class="fc" id="L93">  try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(base)) {</span>
+<span class="fc" id="L94">    int idx = 1;</span>
+<span class="fc" id="L95">    ps.setLong(idx++, userID);</span>
+
+<span class="fc bfc" id="L97" title="All 4 branches covered.">    if (hasFrom &amp;&amp; hasTo) {</span>
+<span class="fc" id="L98">      ps.setString(idx++, fromISO);</span>
+<span class="fc" id="L99">      ps.setString(idx++, toISO);</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">    } else if (hasFrom) {</span>
+<span class="fc" id="L101">      ps.setString(idx++, fromISO);</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">    } else if (hasTo) {</span>
+<span class="fc" id="L103">      ps.setString(idx++, toISO);</span>
+    }
+
+<span class="fc" id="L106">    try (ResultSet rs = ps.executeQuery()) {</span>
+<span class="fc" id="L107">      List&lt;Activity&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">      while (rs.next()) out.add(map(rs));</span>
+<span class="fc" id="L109">      return out;</span>
+    }
+  }
+}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

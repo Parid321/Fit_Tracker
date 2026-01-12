@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Schema.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">db</a> &gt; <span class="el_source">Schema.java</span></div><h1>Schema.java</h1><pre class="source lang-java linenums">package db;
+
+public final class Schema {
+  private Schema(){}
+
+<span class="fc" id="L6">  public static final String[] SQL = {</span>
+    &quot;PRAGMA foreign_keys = ON;&quot;,
+
+    &quot;CREATE TABLE IF NOT EXISTS Users (&quot; +
+      &quot;userID INTEGER PRIMARY KEY AUTOINCREMENT,&quot; +
+      &quot;name TEXT NOT NULL,&quot; +
+      &quot;email TEXT NOT NULL UNIQUE,&quot; +
+      &quot;age INTEGER,&quot; +
+      &quot;weight REAL,&quot; +
+      &quot;goal TEXT,&quot; +
+      &quot;password_hash TEXT NOT NULL&quot; +
+    &quot;);&quot;,
+
+    &quot;CREATE TABLE IF NOT EXISTS MetValues (&quot; +
+      &quot;type TEXT PRIMARY KEY,&quot; +
+      &quot;met REAL NOT NULL&quot; +
+    &quot;);&quot;,
+
+    &quot;CREATE TABLE IF NOT EXISTS Activities (&quot; +
+      &quot;activityID INTEGER PRIMARY KEY AUTOINCREMENT,&quot; +
+      &quot;userID INTEGER NOT NULL,&quot; +
+      &quot;type TEXT NOT NULL,&quot; +
+      &quot;distance_km REAL DEFAULT 0,&quot; +
+      &quot;duration_min INTEGER NOT NULL,&quot; +
+      &quot;calories INTEGER NOT NULL,&quot; +
+      &quot;activity_date TEXT NOT NULL,&quot; + // YYYY-MM-DD
+      &quot;notes TEXT,&quot; +
+      &quot;FOREIGN KEY(userID) REFERENCES Users(userID) ON DELETE CASCADE&quot; +
+    &quot;);&quot;,
+
+    &quot;CREATE TABLE IF NOT EXISTS Statistics (&quot; +
+      &quot;statsID INTEGER PRIMARY KEY AUTOINCREMENT,&quot; +
+      &quot;userID INTEGER NOT NULL,&quot; +
+      &quot;period TEXT NOT NULL,&quot; + // Weekly/Monthly
+      &quot;total_activities INTEGER NOT NULL,&quot; +
+      &quot;total_calories INTEGER NOT NULL,&quot; +
+      &quot;avg_progress INTEGER NOT NULL,&quot; +
+      &quot;generated_at TEXT DEFAULT (datetime('now')),&quot; +
+      &quot;FOREIGN KEY(userID) REFERENCES Users(userID) ON DELETE CASCADE&quot; +
+    &quot;);&quot;,
+
+    &quot;CREATE TABLE IF NOT EXISTS Notifications (&quot; +
+      &quot;notifID INTEGER PRIMARY KEY AUTOINCREMENT,&quot; +
+      &quot;userID INTEGER NOT NULL,&quot; +
+      &quot;content TEXT NOT NULL,&quot; +
+      &quot;created_at TEXT DEFAULT (datetime('now')),&quot; +
+      &quot;status TEXT NOT NULL DEFAULT 'Unread',&quot; +
+      &quot;FOREIGN KEY(userID) REFERENCES Users(userID) ON DELETE CASCADE&quot; +
+    &quot;);&quot;,
+
+    &quot;CREATE TABLE IF NOT EXISTS Devices (&quot; +
+      &quot;deviceID INTEGER PRIMARY KEY AUTOINCREMENT,&quot; +
+      &quot;userID INTEGER NOT NULL,&quot; +
+      &quot;device_name TEXT NOT NULL,&quot; +
+      &quot;sync_status TEXT NOT NULL DEFAULT 'Not Synced',&quot; +
+      &quot;FOREIGN KEY(userID) REFERENCES Users(userID) ON DELETE CASCADE&quot; +
+    &quot;);&quot;
+  };
+
+<span class="fc" id="L65">  public static final String[] SEED = {</span>
+    &quot;INSERT OR IGNORE INTO MetValues(type, met) VALUES ('Walking',3.5);&quot;,
+    &quot;INSERT OR IGNORE INTO MetValues(type, met) VALUES ('Running',8.0);&quot;,
+    &quot;INSERT OR IGNORE INTO MetValues(type, met) VALUES ('Cycling',6.8);&quot;,
+    &quot;INSERT OR IGNORE INTO MetValues(type, met) VALUES ('Gym',5.0);&quot;,
+    &quot;INSERT OR IGNORE INTO MetValues(type, met) VALUES ('Yoga',2.5);&quot;,
+    &quot;INSERT OR IGNORE INTO MetValues(type, met) VALUES ('Football',7.0);&quot;,
+    &quot;INSERT OR IGNORE INTO MetValues(type, met) VALUES ('Swimming',6.0);&quot;
+  };
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DevicesPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">DevicesPanel.java</span></div><h1>DevicesPanel.java</h1><pre class="source lang-java linenums">package ui;
+
+import app.AppSession;
+import dao.DeviceDao;
+import model.Device;
+import service.NotificationService;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+
+public class DevicesPanel extends JPanel {
+<span class="nc" id="L14">  private final JTextField name = new JTextField();</span>
+<span class="nc" id="L15">  private final DefaultTableModel model = new DefaultTableModel(</span>
+    new Object[]{&quot;ID&quot;,&quot;Device Name&quot;,&quot;Sync Status&quot;}, 0
+  );
+<span class="nc" id="L18">  private final JTable table = new JTable(model);</span>
+
+<span class="nc" id="L20">  private final DeviceDao dao = new DeviceDao();</span>
+<span class="nc" id="L21">  private final NotificationService notif = new NotificationService();</span>
+
+<span class="nc" id="L23">  public DevicesPanel() {</span>
+<span class="nc" id="L24">    setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L26">    JPanel top = new JPanel(new BorderLayout(8,8));</span>
+<span class="nc" id="L27">    top.setBorder(BorderFactory.createTitledBorder(&quot;Add Device&quot;));</span>
+
+<span class="nc" id="L29">    JPanel form = new JPanel(new GridLayout(1,2,8,8));</span>
+<span class="nc" id="L30">    form.add(new JLabel(&quot;Device name:&quot;));</span>
+<span class="nc" id="L31">    form.add(name);</span>
+
+<span class="nc" id="L33">    JButton add = new JButton(&quot;Add&quot;);</span>
+<span class="nc" id="L34">    add.addActionListener(e -&gt; addDevice());</span>
+
+<span class="nc" id="L36">    top.add(form, BorderLayout.CENTER);</span>
+<span class="nc" id="L37">    top.add(add, BorderLayout.EAST);</span>
+
+<span class="nc" id="L39">    JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L40">    JButton refresh = new JButton(&quot;Refresh&quot;);</span>
+<span class="nc" id="L41">    JButton toggle = new JButton(&quot;Toggle Sync&quot;);</span>
+<span class="nc" id="L42">    JButton del = new JButton(&quot;Delete&quot;);</span>
+<span class="nc" id="L43">    actions.add(refresh); actions.add(toggle); actions.add(del);</span>
+
+<span class="nc" id="L45">    refresh.addActionListener(e -&gt; load());</span>
+<span class="nc" id="L46">    toggle.addActionListener(e -&gt; toggle());</span>
+<span class="nc" id="L47">    del.addActionListener(e -&gt; delete());</span>
+
+<span class="nc" id="L49">    add(top, BorderLayout.NORTH);</span>
+<span class="nc" id="L50">    add(new JScrollPane(table), BorderLayout.CENTER);</span>
+<span class="nc" id="L51">    add(actions, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L53">    load();</span>
+<span class="nc" id="L54">  }</span>
+
+  private void addDevice(){
+    try{
+<span class="nc" id="L58">      String dn = name.getText().trim();</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">      if(dn.isEmpty()){</span>
+<span class="nc" id="L60">        JOptionPane.showMessageDialog(this, &quot;Vendos emrin e pajisjes.&quot;);</span>
+<span class="nc" id="L61">        return;</span>
+      }
+<span class="nc" id="L63">      Device d = new Device();</span>
+<span class="nc" id="L64">      d.userID = AppSession.getUser().userID;</span>
+<span class="nc" id="L65">      d.deviceName = dn;</span>
+<span class="nc" id="L66">      d.syncStatus = &quot;Not Synced&quot;;</span>
+<span class="nc" id="L67">      dao.insert(d);</span>
+<span class="nc" id="L68">      notif.info(d.userID, &quot;Device added: &quot; + dn);</span>
+<span class="nc" id="L69">      name.setText(&quot;&quot;);</span>
+<span class="nc" id="L70">      load();</span>
+<span class="nc" id="L71">    }catch(Exception e){</span>
+<span class="nc" id="L72">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L73">    }</span>
+<span class="nc" id="L74">  }</span>
+
+  private void toggle(){
+    try{
+<span class="nc" id="L78">      int row = table.getSelectedRow();</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">      if(row &lt; 0){ JOptionPane.showMessageDialog(this, &quot;Zgjidh një pajisje.&quot;); return; }</span>
+<span class="nc" id="L80">      long id = Long.parseLong(model.getValueAt(row,0).toString());</span>
+<span class="nc" id="L81">      dao.toggle(id, AppSession.getUser().userID);</span>
+<span class="nc" id="L82">      notif.info(AppSession.getUser().userID, &quot;Device sync toggled: ID &quot; + id);</span>
+<span class="nc" id="L83">      load();</span>
+<span class="nc" id="L84">    }catch(Exception e){</span>
+<span class="nc" id="L85">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L86">    }</span>
+<span class="nc" id="L87">  }</span>
+
+  private void delete(){
+    try{
+<span class="nc" id="L91">      int row = table.getSelectedRow();</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">      if(row &lt; 0){ JOptionPane.showMessageDialog(this, &quot;Zgjidh një pajisje.&quot;); return; }</span>
+<span class="nc" id="L93">      long id = Long.parseLong(model.getValueAt(row,0).toString());</span>
+<span class="nc" id="L94">      dao.delete(id, AppSession.getUser().userID);</span>
+<span class="nc" id="L95">      notif.info(AppSession.getUser().userID, &quot;Device deleted: ID &quot; + id);</span>
+<span class="nc" id="L96">      load();</span>
+<span class="nc" id="L97">    }catch(Exception e){</span>
+<span class="nc" id="L98">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L99">    }</span>
+<span class="nc" id="L100">  }</span>
+
+  private void load(){
+    try{
+<span class="nc" id="L104">      model.setRowCount(0);</span>
+<span class="nc" id="L105">      List&lt;Device&gt; list = dao.list(AppSession.getUser().userID);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">      for(Device d: list){</span>
+<span class="nc" id="L107">        model.addRow(new Object[]{d.deviceID, d.deviceName, d.syncStatus});</span>
+<span class="nc" id="L108">      }</span>
+<span class="nc" id="L109">    }catch(Exception e){</span>
+<span class="nc" id="L110">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L111">    }</span>
+<span class="nc" id="L112">  }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

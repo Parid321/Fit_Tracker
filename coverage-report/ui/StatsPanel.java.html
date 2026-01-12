@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatsPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">StatsPanel.java</span></div><h1>StatsPanel.java</h1><pre class="source lang-java linenums">package ui;
+
+import app.AppSession;
+import dao.StatisticsDao;
+import model.Statistic;
+import service.NotificationService;
+import service.StatisticsService;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+
+public class StatsPanel extends JPanel {
+<span class="nc" id="L15">  private final JComboBox&lt;String&gt; period = new JComboBox&lt;&gt;(new String[]{&quot;Weekly&quot;, &quot;Monthly&quot;});</span>
+<span class="nc" id="L16">  private final DefaultTableModel model = new DefaultTableModel(</span>
+    new Object[]{&quot;ID&quot;,&quot;Period&quot;,&quot;Total Activities&quot;,&quot;Total Calories&quot;,&quot;Avg/Day&quot;,&quot;Generated At&quot;}, 0
+  );
+<span class="nc" id="L19">  private final JTable table = new JTable(model);</span>
+
+<span class="nc" id="L21">  private final StatisticsService statsService = new StatisticsService();</span>
+<span class="nc" id="L22">  private final StatisticsDao statsDao = new StatisticsDao();</span>
+<span class="nc" id="L23">  private final NotificationService notif = new NotificationService();</span>
+
+<span class="nc" id="L25">  public StatsPanel() {</span>
+<span class="nc" id="L26">    setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L28">    JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));</span>
+<span class="nc" id="L29">    JButton gen = new JButton(&quot;Generate&quot;);</span>
+<span class="nc" id="L30">    JButton refresh = new JButton(&quot;Refresh&quot;);</span>
+<span class="nc" id="L31">    top.add(new JLabel(&quot;Period:&quot;));</span>
+<span class="nc" id="L32">    top.add(period);</span>
+<span class="nc" id="L33">    top.add(gen);</span>
+<span class="nc" id="L34">    top.add(refresh);</span>
+
+<span class="nc" id="L36">    gen.addActionListener(e -&gt; generate());</span>
+<span class="nc" id="L37">    refresh.addActionListener(e -&gt; load());</span>
+
+<span class="nc" id="L39">    add(top, BorderLayout.NORTH);</span>
+<span class="nc" id="L40">    add(new JScrollPane(table), BorderLayout.CENTER);</span>
+
+<span class="nc" id="L42">    load();</span>
+<span class="nc" id="L43">  }</span>
+
+  private void generate() {
+    try {
+<span class="nc" id="L47">      long uid = AppSession.getUser().userID;</span>
+<span class="nc" id="L48">      String p = (String) period.getSelectedItem();</span>
+<span class="nc" id="L49">      Statistic s = statsService.generate(uid, p);</span>
+<span class="nc" id="L50">      notif.info(uid, &quot;Statistics generated: &quot; + p + &quot; (&quot; + s.totalCalories + &quot; kcal)&quot;);</span>
+<span class="nc" id="L51">      load();</span>
+<span class="nc" id="L52">      JOptionPane.showMessageDialog(this, &quot;Generated: &quot; + p);</span>
+<span class="nc" id="L53">    } catch (Exception e) {</span>
+<span class="nc" id="L54">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L55">    }</span>
+<span class="nc" id="L56">  }</span>
+
+  private void load() {
+    try {
+<span class="nc" id="L60">      model.setRowCount(0);</span>
+<span class="nc" id="L61">      List&lt;Statistic&gt; list = statsDao.list(AppSession.getUser().userID);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">      for (Statistic s : list) {</span>
+<span class="nc" id="L63">        model.addRow(new Object[]{</span>
+<span class="nc" id="L64">          s.statsID, s.period, s.totalActivities, s.totalCalories, s.avgProgress, s.generatedAt</span>
+        });
+<span class="nc" id="L66">      }</span>
+<span class="nc" id="L67">    } catch (Exception e) {</span>
+<span class="nc" id="L68">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L69">    }</span>
+<span class="nc" id="L70">  }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

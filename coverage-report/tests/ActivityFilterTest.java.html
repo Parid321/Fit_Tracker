@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityFilterTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">tests</a> &gt; <span class="el_source">ActivityFilterTest.java</span></div><h1>ActivityFilterTest.java</h1><pre class="source lang-java linenums">package tests;
+
+import dao.ActivityDao;
+import dao.UserDao;
+import model.Activity;
+import model.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L14">public class ActivityFilterTest {</span>
+
+  @BeforeEach
+  void init() {
+<span class="fc" id="L18">    TestBootstrap.initDb();</span>
+<span class="fc" id="L19">  }</span>
+
+  @Test
+  void filter_between_dates_returnsOnlyInRange() throws Exception {
+    // create user
+<span class="fc" id="L24">    UserDao userDao = new UserDao();</span>
+<span class="fc" id="L25">    User u = new User();</span>
+<span class="fc" id="L26">    u.name = &quot;U&quot;;</span>
+<span class="fc" id="L27">    u.email = &quot;u@test.com&quot;;</span>
+<span class="fc" id="L28">    u.passwordHash = &quot;x&quot;.repeat(64);</span>
+<span class="fc" id="L29">    long uid = userDao.insert(u);</span>
+
+    // insert activities
+<span class="fc" id="L32">    ActivityDao aDao = new ActivityDao();</span>
+<span class="fc" id="L33">    insertAct(aDao, uid, &quot;Running&quot;, &quot;2026-01-01&quot;, 300);</span>
+<span class="fc" id="L34">    insertAct(aDao, uid, &quot;Walking&quot;, &quot;2026-01-05&quot;, 80);</span>
+<span class="fc" id="L35">    insertAct(aDao, uid, &quot;Gym&quot;, &quot;2026-01-10&quot;, 220);</span>
+
+    // filter
+<span class="fc" id="L38">    List&lt;Activity&gt; list = aDao.listForUserFiltered(uid, &quot;2026-01-02&quot;, &quot;2026-01-09&quot;);</span>
+<span class="fc" id="L39">    assertEquals(1, list.size());</span>
+<span class="fc" id="L40">    assertEquals(&quot;Walking&quot;, list.get(0).type);</span>
+<span class="fc" id="L41">    assertEquals(&quot;2026-01-05&quot;, list.get(0).activityDate);</span>
+<span class="fc" id="L42">  }</span>
+
+  @Test
+  void filter_onlyFromDate() throws Exception {
+<span class="fc" id="L46">    UserDao userDao = new UserDao();</span>
+<span class="fc" id="L47">    User u = new User();</span>
+<span class="fc" id="L48">    u.name = &quot;U2&quot;;</span>
+<span class="fc" id="L49">    u.email = &quot;u2@test.com&quot;;</span>
+<span class="fc" id="L50">    u.passwordHash = &quot;x&quot;.repeat(64);</span>
+<span class="fc" id="L51">    long uid = userDao.insert(u);</span>
+
+<span class="fc" id="L53">    ActivityDao aDao = new ActivityDao();</span>
+<span class="fc" id="L54">    insertAct(aDao, uid, &quot;Walking&quot;, &quot;2026-01-05&quot;, 80);</span>
+<span class="fc" id="L55">    insertAct(aDao, uid, &quot;Gym&quot;, &quot;2026-01-10&quot;, 220);</span>
+
+<span class="fc" id="L57">    List&lt;Activity&gt; list = aDao.listForUserFiltered(uid, &quot;2026-01-06&quot;, &quot;&quot;);</span>
+<span class="fc" id="L58">    assertEquals(1, list.size());</span>
+<span class="fc" id="L59">    assertEquals(&quot;Gym&quot;, list.get(0).type);</span>
+<span class="fc" id="L60">  }</span>
+
+  @Test
+  void filter_onlyToDate() throws Exception {
+<span class="fc" id="L64">    UserDao userDao = new UserDao();</span>
+<span class="fc" id="L65">    User u = new User();</span>
+<span class="fc" id="L66">    u.name = &quot;U3&quot;;</span>
+<span class="fc" id="L67">    u.email = &quot;u3@test.com&quot;;</span>
+<span class="fc" id="L68">    u.passwordHash = &quot;x&quot;.repeat(64);</span>
+<span class="fc" id="L69">    long uid = userDao.insert(u);</span>
+
+<span class="fc" id="L71">    ActivityDao aDao = new ActivityDao();</span>
+<span class="fc" id="L72">    insertAct(aDao, uid, &quot;Running&quot;, &quot;2026-01-01&quot;, 300);</span>
+<span class="fc" id="L73">    insertAct(aDao, uid, &quot;Walking&quot;, &quot;2026-01-05&quot;, 80);</span>
+<span class="fc" id="L74">    insertAct(aDao, uid, &quot;Gym&quot;, &quot;2026-01-10&quot;, 220);</span>
+
+<span class="fc" id="L76">    List&lt;Activity&gt; list = aDao.listForUserFiltered(uid, &quot;&quot;, &quot;2026-01-05&quot;);</span>
+<span class="fc" id="L77">    assertEquals(2, list.size());</span>
+    // ordered DESC, so first should be 2026-01-05
+<span class="fc" id="L79">    assertEquals(&quot;2026-01-05&quot;, list.get(0).activityDate);</span>
+<span class="fc" id="L80">  }</span>
+
+  private void insertAct(ActivityDao dao, long uid, String type, String date, int cal) throws Exception {
+<span class="fc" id="L83">    Activity a = new Activity();</span>
+<span class="fc" id="L84">    a.userID = uid;</span>
+<span class="fc" id="L85">    a.type = type;</span>
+<span class="fc" id="L86">    a.distanceKm = 0;</span>
+<span class="fc" id="L87">    a.durationMin = 10;</span>
+<span class="fc" id="L88">    a.calories = cal;</span>
+<span class="fc" id="L89">    a.activityDate = date;</span>
+<span class="fc" id="L90">    a.notes = null;</span>
+<span class="fc" id="L91">    dao.insert(a);</span>
+<span class="fc" id="L92">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

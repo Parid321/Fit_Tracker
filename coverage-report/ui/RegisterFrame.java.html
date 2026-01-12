@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterFrame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">RegisterFrame.java</span></div><h1>RegisterFrame.java</h1><pre class="source lang-java linenums">package ui;
+
+import app.AppSession;
+import model.User;
+import service.AuthService;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class RegisterFrame extends JFrame {
+<span class="nc" id="L11">  private final JTextField name = new JTextField();</span>
+<span class="nc" id="L12">  private final JTextField email = new JTextField();</span>
+<span class="nc" id="L13">  private final JTextField age = new JTextField();</span>
+<span class="nc" id="L14">  private final JTextField weight = new JTextField();</span>
+<span class="nc" id="L15">  private final JTextField goal = new JTextField();</span>
+<span class="nc" id="L16">  private final JPasswordField pass = new JPasswordField();</span>
+
+<span class="nc" id="L18">  private final AuthService auth = new AuthService();</span>
+  private final JFrame backTo;
+
+<span class="nc" id="L21">  public RegisterFrame(JFrame backTo) {</span>
+<span class="nc" id="L22">    this.backTo = backTo;</span>
+
+<span class="nc" id="L24">    setTitle(&quot;FitTrack - Register&quot;);</span>
+<span class="nc" id="L25">    setSize(520, 360);</span>
+<span class="nc" id="L26">    setLocationRelativeTo(null);</span>
+<span class="nc" id="L27">    setDefaultCloseOperation(EXIT_ON_CLOSE);</span>
+
+<span class="nc" id="L29">    JPanel p = new JPanel(new GridBagLayout());</span>
+<span class="nc" id="L30">    GridBagConstraints g = new GridBagConstraints();</span>
+<span class="nc" id="L31">    g.insets = new Insets(6,6,6,6);</span>
+<span class="nc" id="L32">    g.fill = GridBagConstraints.HORIZONTAL;</span>
+
+<span class="nc" id="L34">    int r=0;</span>
+<span class="nc" id="L35">    addRow(p,g,r++,&quot;Name:&quot;,name);</span>
+<span class="nc" id="L36">    addRow(p,g,r++,&quot;Email:&quot;,email);</span>
+<span class="nc" id="L37">    addRow(p,g,r++,&quot;Age (optional):&quot;,age);</span>
+<span class="nc" id="L38">    addRow(p,g,r++,&quot;Weight kg (optional):&quot;,weight);</span>
+<span class="nc" id="L39">    addRow(p,g,r++,&quot;Goal (optional):&quot;,goal);</span>
+<span class="nc" id="L40">    addRow(p,g,r++,&quot;Password:&quot;,pass);</span>
+
+<span class="nc" id="L42">    JButton btnBack = new JButton(&quot;Back&quot;);</span>
+<span class="nc" id="L43">    JButton btnCreate = new JButton(&quot;Create Account&quot;);</span>
+
+<span class="nc" id="L45">    JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L46">    actions.add(btnBack);</span>
+<span class="nc" id="L47">    actions.add(btnCreate);</span>
+
+<span class="nc" id="L49">    g.gridx=0; g.gridy=r; g.gridwidth=2;</span>
+<span class="nc" id="L50">    p.add(actions, g);</span>
+
+<span class="nc" id="L52">    btnBack.addActionListener(e -&gt; {</span>
+<span class="nc" id="L53">      backTo.setVisible(true);</span>
+<span class="nc" id="L54">      dispose();</span>
+<span class="nc" id="L55">    });</span>
+
+<span class="nc" id="L57">    btnCreate.addActionListener(e -&gt; doRegister());</span>
+
+<span class="nc" id="L59">    setContentPane(p);</span>
+<span class="nc" id="L60">  }</span>
+
+  private void addRow(JPanel p, GridBagConstraints g, int row, String label, JComponent field){
+<span class="nc" id="L63">    g.gridx=0; g.gridy=row; g.gridwidth=1;</span>
+<span class="nc" id="L64">    p.add(new JLabel(label), g);</span>
+<span class="nc" id="L65">    g.gridx=1; g.gridy=row;</span>
+<span class="nc" id="L66">    p.add(field, g);</span>
+<span class="nc" id="L67">  }</span>
+
+  private void doRegister(){
+    try {
+<span class="nc" id="L71">      String nm = name.getText().trim();</span>
+<span class="nc" id="L72">      String em = email.getText().trim();</span>
+<span class="nc" id="L73">      String pw = new String(pass.getPassword());</span>
+<span class="nc bnc" id="L74" title="All 6 branches missed.">      if (nm.isEmpty() || em.isEmpty() || pw.isEmpty()) {</span>
+<span class="nc" id="L75">        JOptionPane.showMessageDialog(this, &quot;Name, Email, Password janë të detyrueshme.&quot;);</span>
+<span class="nc" id="L76">        return;</span>
+      }
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">      Integer a = age.getText().trim().isEmpty() ? null : Integer.parseInt(age.getText().trim());</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">      Double w = weight.getText().trim().isEmpty() ? null : Double.parseDouble(weight.getText().trim());</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">      String gl = goal.getText().trim().isEmpty() ? null : goal.getText().trim();</span>
+
+<span class="nc" id="L83">      User u = auth.register(nm, em, a, w, gl, pw);</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">      if (u == null) {</span>
+<span class="nc" id="L85">        JOptionPane.showMessageDialog(this, &quot;Ky email ekziston. Provo login.&quot;);</span>
+<span class="nc" id="L86">        return;</span>
+      }
+
+<span class="nc" id="L89">      AppSession.setUser(u);</span>
+<span class="nc" id="L90">      new MainFrame().setVisible(true);</span>
+<span class="nc" id="L91">      dispose();</span>
+<span class="nc" id="L92">    } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L93">      JOptionPane.showMessageDialog(this, &quot;Age/Weight duhet të jenë numra.&quot;);</span>
+<span class="nc" id="L94">    } catch (Exception ex) {</span>
+<span class="nc" id="L95">      JOptionPane.showMessageDialog(this, &quot;Gabim: &quot; + ex.getMessage());</span>
+<span class="nc" id="L96">    }</span>
+<span class="nc" id="L97">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivitiesPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">ActivitiesPanel.java</span></div><h1>ActivitiesPanel.java</h1><pre class="source lang-java linenums">package ui;
+
+import app.AppSession;
+import dao.ActivityDao;
+import dao.MetDao;
+import dao.UserDao;
+import model.Activity;
+import model.User;
+import service.CaloriesService;
+import service.NotificationService;
+import util.CsvUtil;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.io.File;
+import java.time.LocalDate;
+import java.util.List;
+
+public class ActivitiesPanel extends JPanel {
+<span class="nc" id="L21">  private final JComboBox&lt;String&gt; type = new JComboBox&lt;&gt;(new String[]{</span>
+    &quot;Walking&quot;,&quot;Running&quot;,&quot;Cycling&quot;,&quot;Gym&quot;,&quot;Yoga&quot;,&quot;Football&quot;,&quot;Swimming&quot;
+  });
+<span class="nc" id="L24">  private final JTextField date = new JTextField(LocalDate.now().toString());</span>
+<span class="nc" id="L25">  private final JTextField distance = new JTextField(&quot;0&quot;);</span>
+<span class="nc" id="L26">  private final JTextField duration = new JTextField(&quot;30&quot;);</span>
+<span class="nc" id="L27">  private final JTextField notes = new JTextField(&quot;&quot;);</span>
+
+  // FILTER
+<span class="nc" id="L30">  private final JTextField fromDate = new JTextField(&quot;&quot;);</span>
+<span class="nc" id="L31">  private final JTextField toDate = new JTextField(&quot;&quot;);</span>
+
+<span class="nc" id="L33">  private final DefaultTableModel model = new DefaultTableModel(</span>
+    new Object[]{&quot;ID&quot;,&quot;Date&quot;,&quot;Type&quot;,&quot;Distance(km)&quot;,&quot;Duration(min)&quot;,&quot;Calories&quot;,&quot;Notes&quot;}, 0
+<span class="nc" id="L35">  ) {</span>
+<span class="nc" id="L36">    @Override public boolean isCellEditable(int row, int col) { return false; }</span>
+  };
+
+<span class="nc" id="L39">  private final JTable table = new JTable(model);</span>
+
+<span class="nc" id="L41">  private final ActivityDao activityDao = new ActivityDao();</span>
+<span class="nc" id="L42">  private final MetDao metDao = new MetDao();</span>
+<span class="nc" id="L43">  private final UserDao userDao = new UserDao();</span>
+<span class="nc" id="L44">  private final CaloriesService caloriesService = new CaloriesService();</span>
+<span class="nc" id="L45">  private final NotificationService notif = new NotificationService();</span>
+
+<span class="nc" id="L47">  public ActivitiesPanel() {</span>
+<span class="nc" id="L48">    setLayout(new BorderLayout());</span>
+
+    // ADD FORM (top)
+<span class="nc" id="L51">    JPanel form = new JPanel(new GridLayout(2, 6, 8, 8));</span>
+<span class="nc" id="L52">    form.setBorder(BorderFactory.createTitledBorder(&quot;Add Activity&quot;));</span>
+
+<span class="nc" id="L54">    form.add(new JLabel(&quot;Date (YYYY-MM-DD)&quot;));</span>
+<span class="nc" id="L55">    form.add(new JLabel(&quot;Type&quot;));</span>
+<span class="nc" id="L56">    form.add(new JLabel(&quot;Distance km&quot;));</span>
+<span class="nc" id="L57">    form.add(new JLabel(&quot;Duration min&quot;));</span>
+<span class="nc" id="L58">    form.add(new JLabel(&quot;Notes&quot;));</span>
+<span class="nc" id="L59">    form.add(new JLabel(&quot; &quot;));</span>
+
+<span class="nc" id="L61">    form.add(date);</span>
+<span class="nc" id="L62">    form.add(type);</span>
+<span class="nc" id="L63">    form.add(distance);</span>
+<span class="nc" id="L64">    form.add(duration);</span>
+<span class="nc" id="L65">    form.add(notes);</span>
+
+<span class="nc" id="L67">    JButton add = new JButton(&quot;Add&quot;);</span>
+<span class="nc" id="L68">    form.add(add);</span>
+<span class="nc" id="L69">    add.addActionListener(e -&gt; addActivity());</span>
+
+    // FILTER BAR (under form)
+<span class="nc" id="L72">    JPanel filterBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));</span>
+<span class="nc" id="L73">    filterBar.setBorder(BorderFactory.createTitledBorder(&quot;Search / Filter&quot;));</span>
+
+<span class="nc" id="L75">    filterBar.add(new JLabel(&quot;From:&quot;));</span>
+<span class="nc" id="L76">    fromDate.setPreferredSize(new Dimension(110, 24));</span>
+<span class="nc" id="L77">    filterBar.add(fromDate);</span>
+
+<span class="nc" id="L79">    filterBar.add(new JLabel(&quot;To:&quot;));</span>
+<span class="nc" id="L80">    toDate.setPreferredSize(new Dimension(110, 24));</span>
+<span class="nc" id="L81">    filterBar.add(toDate);</span>
+
+<span class="nc" id="L83">    JButton applyFilter = new JButton(&quot;Apply&quot;);</span>
+<span class="nc" id="L84">    JButton clearFilter = new JButton(&quot;Clear&quot;);</span>
+<span class="nc" id="L85">    JButton exportCsv = new JButton(&quot;Export CSV&quot;);</span>
+
+<span class="nc" id="L87">    filterBar.add(applyFilter);</span>
+<span class="nc" id="L88">    filterBar.add(clearFilter);</span>
+<span class="nc" id="L89">    filterBar.add(exportCsv);</span>
+
+<span class="nc" id="L91">    applyFilter.addActionListener(e -&gt; loadFiltered());</span>
+<span class="nc" id="L92">    clearFilter.addActionListener(e -&gt; {</span>
+<span class="nc" id="L93">      fromDate.setText(&quot;&quot;);</span>
+<span class="nc" id="L94">      toDate.setText(&quot;&quot;);</span>
+<span class="nc" id="L95">      load();</span>
+<span class="nc" id="L96">    });</span>
+<span class="nc" id="L97">    exportCsv.addActionListener(e -&gt; exportCsv());</span>
+
+    // ACTIONS bottom
+<span class="nc" id="L100">    JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L101">    JButton refresh = new JButton(&quot;Refresh&quot;);</span>
+<span class="nc" id="L102">    JButton delete = new JButton(&quot;Delete Selected&quot;);</span>
+
+<span class="nc" id="L104">    actions.add(refresh);</span>
+<span class="nc" id="L105">    actions.add(delete);</span>
+
+<span class="nc" id="L107">    refresh.addActionListener(e -&gt; loadFilteredOrAll());</span>
+<span class="nc" id="L108">    delete.addActionListener(e -&gt; deleteSelected());</span>
+
+    // Layout
+<span class="nc" id="L111">    JPanel top = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L112">    top.add(form, BorderLayout.NORTH);</span>
+<span class="nc" id="L113">    top.add(filterBar, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L115">    add(top, BorderLayout.NORTH);</span>
+<span class="nc" id="L116">    add(new JScrollPane(table), BorderLayout.CENTER);</span>
+<span class="nc" id="L117">    add(actions, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L119">    load();</span>
+<span class="nc" id="L120">  }</span>
+
+  private void addActivity() {
+    try {
+<span class="nc" id="L124">      long uid = AppSession.getUser().userID;</span>
+
+<span class="nc" id="L126">      String d = date.getText().trim();</span>
+<span class="nc" id="L127">      String t = (String) type.getSelectedItem();</span>
+<span class="nc" id="L128">      double dist = Double.parseDouble(distance.getText().trim());</span>
+<span class="nc" id="L129">      int dur = Integer.parseInt(duration.getText().trim());</span>
+<span class="nc" id="L130">      String n = notes.getText().trim();</span>
+
+<span class="nc bnc" id="L132" title="All 6 branches missed.">      if (d.isEmpty() || t == null || dur &lt;= 0) {</span>
+<span class="nc" id="L133">        JOptionPane.showMessageDialog(this, &quot;Date/Type/Duration janë të detyrueshme.&quot;);</span>
+<span class="nc" id="L134">        return;</span>
+      }
+
+      // simple date validation
+<span class="nc" id="L138">      LocalDate.parse(d);</span>
+
+<span class="nc" id="L140">      User u = userDao.findById(uid);</span>
+<span class="nc" id="L141">      double met = metDao.getMetForType(t);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">      double w = (u.weight == null) ? 70.0 : u.weight;</span>
+<span class="nc" id="L143">      int kcal = caloriesService.calc(met, dur, w);</span>
+
+<span class="nc" id="L145">      Activity a = new Activity();</span>
+<span class="nc" id="L146">      a.userID = uid;</span>
+<span class="nc" id="L147">      a.type = t;</span>
+<span class="nc" id="L148">      a.distanceKm = dist;</span>
+<span class="nc" id="L149">      a.durationMin = dur;</span>
+<span class="nc" id="L150">      a.calories = kcal;</span>
+<span class="nc" id="L151">      a.activityDate = d;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">      a.notes = n.isEmpty() ? null : n;</span>
+
+<span class="nc" id="L154">      long id = activityDao.insert(a);</span>
+<span class="nc" id="L155">      notif.info(uid, &quot;Activity added: &quot; + t + &quot; (&quot; + dur + &quot; min, &quot; + kcal + &quot; kcal)&quot;);</span>
+
+      // reset
+<span class="nc" id="L158">      notes.setText(&quot;&quot;);</span>
+<span class="nc" id="L159">      duration.setText(&quot;30&quot;);</span>
+<span class="nc" id="L160">      distance.setText(&quot;0&quot;);</span>
+<span class="nc" id="L161">      date.setText(LocalDate.now().toString());</span>
+
+<span class="nc" id="L163">      loadFilteredOrAll();</span>
+<span class="nc" id="L164">      JOptionPane.showMessageDialog(this, &quot;Saved! activityID=&quot; + id);</span>
+<span class="nc" id="L165">    } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L166">      JOptionPane.showMessageDialog(this, &quot;Distance/Duration duhet të jenë numra.&quot;);</span>
+<span class="nc" id="L167">    } catch (Exception ex) {</span>
+<span class="nc" id="L168">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + ex.getMessage() + &quot;\nDate format: YYYY-MM-DD&quot;);</span>
+<span class="nc" id="L169">    }</span>
+<span class="nc" id="L170">  }</span>
+
+  private void deleteSelected() {
+    try {
+<span class="nc" id="L174">      int row = table.getSelectedRow();</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">      if (row &lt; 0) {</span>
+<span class="nc" id="L176">        JOptionPane.showMessageDialog(this, &quot;Zgjidh një rresht.&quot;);</span>
+<span class="nc" id="L177">        return;</span>
+      }
+<span class="nc" id="L179">      long id = Long.parseLong(model.getValueAt(row, 0).toString());</span>
+<span class="nc" id="L180">      long uid = AppSession.getUser().userID;</span>
+<span class="nc" id="L181">      activityDao.delete(id, uid);</span>
+<span class="nc" id="L182">      notif.info(uid, &quot;Activity deleted: ID &quot; + id);</span>
+<span class="nc" id="L183">      loadFilteredOrAll();</span>
+<span class="nc" id="L184">    } catch (Exception ex) {</span>
+<span class="nc" id="L185">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L186">    }</span>
+<span class="nc" id="L187">  }</span>
+
+  private void loadFilteredOrAll() {
+<span class="nc bnc" id="L190" title="All 4 branches missed.">    if ((fromDate.getText() != null &amp;&amp; !fromDate.getText().trim().isEmpty()) ||</span>
+<span class="nc bnc" id="L191" title="All 4 branches missed.">        (toDate.getText() != null &amp;&amp; !toDate.getText().trim().isEmpty())) {</span>
+<span class="nc" id="L192">      loadFiltered();</span>
+    } else {
+<span class="nc" id="L194">      load();</span>
+    }
+<span class="nc" id="L196">  }</span>
+
+  private void load() {
+    try {
+<span class="nc" id="L200">      model.setRowCount(0);</span>
+<span class="nc" id="L201">      List&lt;Activity&gt; list = activityDao.listForUser(AppSession.getUser().userID);</span>
+<span class="nc" id="L202">      fillTable(list);</span>
+<span class="nc" id="L203">    } catch (Exception e) {</span>
+<span class="nc" id="L204">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L205">    }</span>
+<span class="nc" id="L206">  }</span>
+
+  private void loadFiltered() {
+    try {
+<span class="nc" id="L210">      String f = fromDate.getText().trim();</span>
+<span class="nc" id="L211">      String t = toDate.getText().trim();</span>
+
+<span class="nc bnc" id="L213" title="All 2 branches missed.">      if (!f.isEmpty()) LocalDate.parse(f);</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">      if (!t.isEmpty()) LocalDate.parse(t);</span>
+
+<span class="nc" id="L216">      model.setRowCount(0);</span>
+<span class="nc" id="L217">      List&lt;Activity&gt; list = activityDao.listForUserFiltered(AppSession.getUser().userID, f, t);</span>
+<span class="nc" id="L218">      fillTable(list);</span>
+<span class="nc" id="L219">    } catch (Exception e) {</span>
+<span class="nc" id="L220">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage() + &quot;\nDate format: YYYY-MM-DD&quot;);</span>
+<span class="nc" id="L221">    }</span>
+<span class="nc" id="L222">  }</span>
+
+  private void fillTable(List&lt;Activity&gt; list) {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">    for (Activity a : list) {</span>
+<span class="nc" id="L226">      model.addRow(new Object[]{</span>
+<span class="nc" id="L227">        a.activityID, a.activityDate, a.type,</span>
+<span class="nc" id="L228">        a.distanceKm, a.durationMin, a.calories,</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        a.notes == null ? &quot;&quot; : a.notes</span>
+      });
+<span class="nc" id="L231">    }</span>
+<span class="nc" id="L232">  }</span>
+
+  private void exportCsv() {
+    try {
+<span class="nc" id="L236">      String f = fromDate.getText().trim();</span>
+<span class="nc" id="L237">      String t = toDate.getText().trim();</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">      if (!f.isEmpty()) LocalDate.parse(f);</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">      if (!t.isEmpty()) LocalDate.parse(t);</span>
+
+      List&lt;Activity&gt; list;
+<span class="nc bnc" id="L242" title="All 4 branches missed.">      if (!f.isEmpty() || !t.isEmpty()) {</span>
+<span class="nc" id="L243">        list = activityDao.listForUserFiltered(AppSession.getUser().userID, f, t);</span>
+      } else {
+<span class="nc" id="L245">        list = activityDao.listForUser(AppSession.getUser().userID);</span>
+      }
+
+<span class="nc" id="L248">      JFileChooser fc = new JFileChooser();</span>
+<span class="nc" id="L249">      fc.setDialogTitle(&quot;Save CSV&quot;);</span>
+<span class="nc" id="L250">      fc.setSelectedFile(new File(&quot;activities.csv&quot;));</span>
+<span class="nc" id="L251">      int res = fc.showSaveDialog(this);</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">      if (res != JFileChooser.APPROVE_OPTION) return;</span>
+
+<span class="nc" id="L254">      File file = fc.getSelectedFile();</span>
+<span class="nc" id="L255">      CsvUtil.exportActivities(file, list);</span>
+
+<span class="nc" id="L257">      JOptionPane.showMessageDialog(this, &quot;CSV exported:\n&quot; + file.getAbsolutePath());</span>
+<span class="nc" id="L258">    } catch (Exception e) {</span>
+<span class="nc" id="L259">      JOptionPane.showMessageDialog(this, &quot;Export error: &quot; + e.getMessage());</span>
+<span class="nc" id="L260">    }</span>
+<span class="nc" id="L261">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

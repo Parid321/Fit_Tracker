@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CsvUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">util</a> &gt; <span class="el_source">CsvUtil.java</span></div><h1>CsvUtil.java</h1><pre class="source lang-java linenums">package util;
+
+import model.Activity;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+<span class="nc" id="L9">public class CsvUtil {</span>
+
+  public static void exportActivities(File file, List&lt;Activity&gt; list) throws IOException {
+<span class="fc" id="L12">    try (Writer w = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {</span>
+      // header
+<span class="fc" id="L14">      w.write(&quot;activityID,date,type,distance_km,duration_min,calories,notes\n&quot;);</span>
+
+<span class="fc bfc" id="L16" title="All 2 branches covered.">      for (Activity a : list) {</span>
+<span class="fc" id="L17">        w.write(a.activityID + &quot;,&quot;);</span>
+<span class="fc" id="L18">        w.write(escape(a.activityDate) + &quot;,&quot;);</span>
+<span class="fc" id="L19">        w.write(escape(a.type) + &quot;,&quot;);</span>
+<span class="fc" id="L20">        w.write(a.distanceKm + &quot;,&quot;);</span>
+<span class="fc" id="L21">        w.write(a.durationMin + &quot;,&quot;);</span>
+<span class="fc" id="L22">        w.write(a.calories + &quot;,&quot;);</span>
+<span class="fc" id="L23">        w.write(escape(a.notes));</span>
+<span class="fc" id="L24">        w.write(&quot;\n&quot;);</span>
+<span class="fc" id="L25">      }</span>
+    }
+<span class="fc" id="L27">  }</span>
+
+  private static String escape(String s) {
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">    if (s == null) return &quot;&quot;;</span>
+<span class="fc" id="L31">    String x = s.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;);</span>
+    // nëse ka presje/newline, e fusim në quotes
+<span class="pc bpc" id="L33" title="2 of 6 branches missed.">    if (x.contains(&quot;,&quot;) || x.contains(&quot;\n&quot;) || x.contains(&quot;\r&quot;)) return &quot;\&quot;&quot; + x + &quot;\&quot;&quot;;</span>
+<span class="fc" id="L34">    return x;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

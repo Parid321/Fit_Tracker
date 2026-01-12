@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticsDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">dao</a> &gt; <span class="el_source">StatisticsDao.java</span></div><h1>StatisticsDao.java</h1><pre class="source lang-java linenums">package dao;
+
+import db.Db;
+import model.Statistic;
+
+import java.sql.*;
+import java.util.*;
+
+<span class="nc" id="L9">public class StatisticsDao {</span>
+
+  public void insert(Statistic s) throws SQLException {
+<span class="nc" id="L12">    String sql = &quot;INSERT INTO Statistics(userID, period, total_activities, total_calories, avg_progress) VALUES(?,?,?,?,?)&quot;;</span>
+<span class="nc" id="L13">    try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(sql)) {</span>
+<span class="nc" id="L14">      ps.setLong(1, s.userID);</span>
+<span class="nc" id="L15">      ps.setString(2, s.period);</span>
+<span class="nc" id="L16">      ps.setInt(3, s.totalActivities);</span>
+<span class="nc" id="L17">      ps.setInt(4, s.totalCalories);</span>
+<span class="nc" id="L18">      ps.setInt(5, s.avgProgress);</span>
+<span class="nc" id="L19">      ps.executeUpdate();</span>
+    }
+<span class="nc" id="L21">  }</span>
+
+  public List&lt;Statistic&gt; list(long userID) throws SQLException {
+<span class="nc" id="L24">    String sql = &quot;SELECT * FROM Statistics WHERE userID=? ORDER BY generated_at DESC, statsID DESC&quot;;</span>
+<span class="nc" id="L25">    try (Connection c = Db.get(); PreparedStatement ps = c.prepareStatement(sql)) {</span>
+<span class="nc" id="L26">      ps.setLong(1, userID);</span>
+<span class="nc" id="L27">      try (ResultSet rs = ps.executeQuery()) {</span>
+<span class="nc" id="L28">        List&lt;Statistic&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        while (rs.next()) out.add(map(rs));</span>
+<span class="nc" id="L30">        return out;</span>
+      }
+    }
+  }
+
+  private Statistic map(ResultSet rs) throws SQLException {
+<span class="nc" id="L36">    Statistic s = new Statistic();</span>
+<span class="nc" id="L37">    s.statsID = rs.getLong(&quot;statsID&quot;);</span>
+<span class="nc" id="L38">    s.userID = rs.getLong(&quot;userID&quot;);</span>
+<span class="nc" id="L39">    s.period = rs.getString(&quot;period&quot;);</span>
+<span class="nc" id="L40">    s.totalActivities = rs.getInt(&quot;total_activities&quot;);</span>
+<span class="nc" id="L41">    s.totalCalories = rs.getInt(&quot;total_calories&quot;);</span>
+<span class="nc" id="L42">    s.avgProgress = rs.getInt(&quot;avg_progress&quot;);</span>
+<span class="nc" id="L43">    s.generatedAt = rs.getString(&quot;generated_at&quot;);</span>
+<span class="nc" id="L44">    return s;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

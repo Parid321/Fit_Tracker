@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TestBootstrap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">tests</a> &gt; <span class="el_source">TestBootstrap.java</span></div><h1>TestBootstrap.java</h1><pre class="source lang-java linenums">package tests;
+
+import db.Db;
+
+import java.io.File;
+
+public final class TestBootstrap {
+  private TestBootstrap() {}
+
+  public static void initDb() {
+    // përdor DB të veçantë për test
+<span class="fc" id="L12">    System.setProperty(&quot;fittrack.db.url&quot;, &quot;jdbc:sqlite:fittrack_test.db&quot;);</span>
+
+    // reset DB file çdo herë (që testet të jenë deterministike)
+<span class="fc" id="L15">    File f = new File(&quot;fittrack_test.db&quot;);</span>
+<span class="pc bpc" id="L16" title="1 of 2 branches missed.">    if (f.exists()) {</span>
+      // në Windows ndonjëherë duhet pak durim nëse connection s’është mbyllur
+<span class="fc" id="L18">      boolean deleted = f.delete();</span>
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">      if (!deleted) {</span>
+        // nëse s’fshihet, të paktën vazhdojmë; por zakonisht fshihet pa problem
+<span class="nc" id="L21">        System.out.println(&quot;[WARN] Could not delete fittrack_test.db (maybe still open).&quot;);</span>
+      }
+    }
+
+    // krijo tables + seed nga zero
+<span class="fc" id="L26">    Db.init();</span>
+<span class="fc" id="L27">  }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

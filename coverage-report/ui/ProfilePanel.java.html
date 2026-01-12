@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProfilePanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">ProfilePanel.java</span></div><h1>ProfilePanel.java</h1><pre class="source lang-java linenums">package ui;
+
+import app.AppSession;
+import dao.UserDao;
+import model.User;
+import service.NotificationService;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class ProfilePanel extends JPanel {
+<span class="nc" id="L12">  private final JTextField name = new JTextField();</span>
+<span class="nc" id="L13">  private final JTextField age = new JTextField();</span>
+<span class="nc" id="L14">  private final JTextField weight = new JTextField();</span>
+<span class="nc" id="L15">  private final JTextField goal = new JTextField();</span>
+
+<span class="nc" id="L17">  private final UserDao userDao = new UserDao();</span>
+<span class="nc" id="L18">  private final NotificationService notif = new NotificationService();</span>
+
+<span class="nc" id="L20">  public ProfilePanel() {</span>
+<span class="nc" id="L21">    setLayout(new GridBagLayout());</span>
+<span class="nc" id="L22">    GridBagConstraints g = new GridBagConstraints();</span>
+<span class="nc" id="L23">    g.insets = new Insets(6,6,6,6);</span>
+<span class="nc" id="L24">    g.fill = GridBagConstraints.HORIZONTAL;</span>
+
+<span class="nc" id="L26">    int r=0;</span>
+<span class="nc" id="L27">    addRow(g, r++, &quot;Name:&quot;, name);</span>
+<span class="nc" id="L28">    addRow(g, r++, &quot;Age:&quot;, age);</span>
+<span class="nc" id="L29">    addRow(g, r++, &quot;Weight kg:&quot;, weight);</span>
+<span class="nc" id="L30">    addRow(g, r++, &quot;Goal:&quot;, goal);</span>
+
+<span class="nc" id="L32">    JButton save = new JButton(&quot;Save Profile&quot;);</span>
+<span class="nc" id="L33">    g.gridx=0; g.gridy=r; g.gridwidth=2;</span>
+<span class="nc" id="L34">    add(save, g);</span>
+
+<span class="nc" id="L36">    save.addActionListener(e -&gt; save());</span>
+
+<span class="nc" id="L38">    load();</span>
+<span class="nc" id="L39">  }</span>
+
+  private void addRow(GridBagConstraints g, int row, String label, JComponent field){
+<span class="nc" id="L42">    g.gridx=0; g.gridy=row; g.gridwidth=1;</span>
+<span class="nc" id="L43">    add(new JLabel(label), g);</span>
+<span class="nc" id="L44">    g.gridx=1; g.gridy=row;</span>
+<span class="nc" id="L45">    add(field, g);</span>
+<span class="nc" id="L46">  }</span>
+
+  private void load(){
+<span class="nc" id="L49">    User u = AppSession.getUser();</span>
+<span class="nc" id="L50">    name.setText(u.name);</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">    age.setText(u.age == null ? &quot;&quot; : String.valueOf(u.age));</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">    weight.setText(u.weight == null ? &quot;&quot; : String.valueOf(u.weight));</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">    goal.setText(u.goal == null ? &quot;&quot; : u.goal);</span>
+<span class="nc" id="L54">  }</span>
+
+  private void save(){
+    try{
+<span class="nc" id="L58">      User u = AppSession.getUser();</span>
+<span class="nc" id="L59">      u.name = name.getText().trim();</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">      u.age = age.getText().trim().isEmpty() ? null : Integer.parseInt(age.getText().trim());</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">      u.weight = weight.getText().trim().isEmpty() ? null : Double.parseDouble(weight.getText().trim());</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">      u.goal = goal.getText().trim().isEmpty() ? null : goal.getText().trim();</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">      if(u.name.isEmpty()){</span>
+<span class="nc" id="L65">        JOptionPane.showMessageDialog(this, &quot;Name nuk mund të jetë bosh.&quot;);</span>
+<span class="nc" id="L66">        return;</span>
+      }
+
+<span class="nc" id="L69">      userDao.updateProfile(u);</span>
+<span class="nc" id="L70">      notif.info(u.userID, &quot;Profile updated.&quot;);</span>
+<span class="nc" id="L71">      JOptionPane.showMessageDialog(this, &quot;Saved.&quot;);</span>
+<span class="nc" id="L72">    }catch(NumberFormatException ex){</span>
+<span class="nc" id="L73">      JOptionPane.showMessageDialog(this, &quot;Age/Weight duhet të jenë numra.&quot;);</span>
+<span class="nc" id="L74">    }catch(Exception e){</span>
+<span class="nc" id="L75">      JOptionPane.showMessageDialog(this, &quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L76">    }</span>
+<span class="nc" id="L77">  }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
